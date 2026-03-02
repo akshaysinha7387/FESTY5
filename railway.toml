@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npx prisma db push && node -e \"const {execSync}=require('child_process');try{execSync('npx ts-node --compiler-options \\'{\\\"module\\\":\\\"CommonJS\\\"}\\' prisma/seed.ts',{stdio:'inherit'})}catch(e){}\" && npm start"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
