@@ -20,7 +20,7 @@ export default function DeliverablesPage() {
   const [events, setEvents] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [filterStatus, setFilterStatus] = useState(searchParams.get('filter') === 'overdue' ? '' : '')
+  const [filterStatus, setFilterStatus] = useState('')
   const [filterUser, setFilterUser] = useState('')
   const [showOverdueOnly, setShowOverdueOnly] = useState(searchParams.get('filter') === 'overdue')
   const [showModal, setShowModal] = useState(false)

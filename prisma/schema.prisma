@@ -6,21 +6,45 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Neon requires directUrl for migrations
+  directUrl = env("DIRECT_URL")
 }
 
-// SQLite does not support native enums in Prisma.
-// All enum-like fields use String with known values enforced at app level.
-// Valid values are documented in comments.
+enum Role {
+  FestHead
+  EventHead
+  SponsorshipLead
+}
+
+enum EventStatus {
+  Planning
+  Active
+  Completed
+}
+
+enum SponsorStage {
+  Lead
+  Contacted
+  InDiscussion
+  Negotiation
+  ClosedWon
+  ClosedLost
+}
+
+enum DeliverableStatus {
+  Pending
+  InProgress
+  Completed
+}
 
 model User {
   id        String @id @default(cuid())
   name      String
   email     String @unique
   password  String
-  // role: "FestHead" | "EventHead" | "SponsorshipLead"
-  role      String
+  role      Role
 
   // Relations
   headOfEvents         Event[]        @relation("EventHead")
@@ -48,13 +72,12 @@ model Fest {
 }
 
 model Event {
-  id                 String @id @default(cuid())
+  id                 String      @id @default(cuid())
   fest_id            String
   event_name         String
   event_head_id      String
   sponsorship_target Float
-  // status: "Planning" | "Active" | "Completed"
-  status             String @default("Planning")
+  status             EventStatus @default(Planning)
 
   // Relations
   fest         Fest          @relation(fields: [fest_id], references: [id], onDelete: Cascade)
@@ -67,16 +90,15 @@ model Event {
 }
 
 model Sponsor {
-  id                     String   @id @default(cuid())
+  id                     String       @id @default(cuid())
   sponsor_name           String
   linked_event_id        String
   owner_id               String
   expected_amount        Float
-  probability_percentage Float    @default(50)
-  // stage: "Lead" | "Contacted" | "InDiscussion" | "Negotiation" | "ClosedWon" | "ClosedLost"
-  stage                  String   @default("Lead")
-  last_updated_at        DateTime @default(now())
-  notes                  String   @default("")
+  probability_percentage Float        @default(50)
+  stage                  SponsorStage @default(Lead)
+  last_updated_at        DateTime     @default(now())
+  notes                  String       @default("")
 
   // Relations
   linkedEvent   Event          @relation(fields: [linked_event_id], references: [id], onDelete: Cascade)
@@ -103,15 +125,14 @@ model WeeklyUpdate {
 }
 
 model Deliverable {
-  id                  String    @id @default(cuid())
+  id                  String            @id @default(cuid())
   sponsor_id          String?
   event_id            String
   title               String
-  description         String    @default("")
+  description         String            @default("")
   assigned_to_user_id String
   due_date            DateTime
-  // status: "Pending" | "InProgress" | "Completed"
-  status              String    @default("Pending")
+  status              DeliverableStatus @default(Pending)
 
   // Relations
   sponsor    Sponsor? @relation(fields: [sponsor_id], references: [id], onDelete: SetNull)
